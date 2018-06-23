@@ -1,4 +1,5 @@
 # encoding: utf-8
+# A社の各カテゴリーの商品を検索、キーワードは「台湾」
 
 import os
 import json
@@ -154,10 +155,6 @@ class Amazon(object):
                 pass
         next_a = self.chro.find_elements_by_css_selector('a.pagnNext')
         if next_a:
-            # print(next_a[0].text)
-            # self.chro.find_element_by_xpath('//body').send_keys(Keys.END)
-            # next_a[0].click()
-            # self.f.write('click\n')
             next_url = next_a[0].get_attribute('href')
             self.crawl_page(next_url)
         else:
@@ -180,9 +177,6 @@ class Amazon(object):
                 self.cod.insert(dict(detail['ItemLookupResponse']['Items']['Item'], **{'_id': asin}))
                 self.co.update_one({'_id': asin}, {'$set': {'geted': True}})
             except Exception as e:
-                # print("例外args:", e.args)
-                # print(detail)
-                # print(json.dumps(detail, ensure_ascii=False, indent=2))
                 if 'Errors' in detail['ItemLookupResponse']['Items'].get('Request', {}):
                     print('@@@@@@@@@Error@@@@@@@@')
                     self.coe.insert(dict(detail['ItemLookupResponse']['Items']['Request']['Errors'], **{'_id': asin}))
@@ -198,14 +192,9 @@ class Amazon(object):
 
     def item(self, item_id):
         data = self.api.ItemLookup(ItemId=item_id, ResponseGroup="Large")
-        # f = open('item.txt', 'w')
-        # f.write(res.decode("utf-8"))
         return xmltodict.parse(data.decode("utf-8"))
 
     def parse(self, data):
-        # soup = BeautifulSoup(data)
-        # f = open('test.txt', 'w')
-        # f.write(json.dumps(xmltodict.parse(data.decode("utf-8"))))
         _data = xmltodict.parse(data.decode("utf-8"))
         print(_data)
         print(_data['ItemSearchResponse']['Items']['TotalResults'])
@@ -219,48 +208,11 @@ class Amazon(object):
                     'rate_val': data['rate_val'],
                     'rate_num': data.get('rate_num')
                 }})
-        # for user in data:
-        #     now = datetime.datetime.now()
-        #     user['_id'] = user.pop('id')
-        #     print(user['nickname'], user['tweet'])
-        #     in_db = self.co.find_one({'_id': user['_id']})
-        #     res = {}
-        #     if in_db:
-        #         res['images'] = self.process_images(in_db['images'], user.pop('images'))
-        #         if in_db['tweet'] != user['tweet']:
-        #             in_db['tweets'].insert(0, {
-        #                 'tweet': user['tweet'],
-        #                 'created': now
-        #                 })
-        #             res['tweets'] = in_db['tweets']
-        #         if in_db['introduction'] != user['introduction']:
-        #             in_db['introductions'].insert(0, {
-        #                 'introduction': user['introduction'],
-        #                 'created': now
-        #                 })
-        #             res['introductions'] = in_db['introductions']
-        #         for k, v in user.items():
-        #             res[k] = v
-        #         res['updated'] = now
-        #     else:
-        #         res = user
-        #         res['tweets'] = [{
-        #                 'tweet': res['tweet'],
-        #                 'created': now
-        #             }]
-        #         res['introductions'] = [{
-        #                 'introduction': res['introduction'],
-        #                 'created': now
-        #             }]
-        #         res['images'] = self.process_images([], res['images'])
-        #         res['created'] = now
-        #     self.co.update_one({'_id': res['_id']}, {'$set': res}, upsert=True)
 
 
 if __name__ == '__main__':
     amz = Amazon()
     # amz.search(keywords='台湾', search_index="Kitchen", item_page=1)
-    # amz.item('B015SVCALW')
     for url in [
         'https://www.amazon.co.jp/s/ref=nb_sb_noss_2?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&url=search-alias%3Dkitchen&field-keywords=%E5%8F%B0%E6%B9%BE',
         'https://www.amazon.co.jp/s/ref=nb_sb_noss_2?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&url=search-alias%3Dcomputers&field-keywords=%E5%8F%B0%E6%B9%BE',
